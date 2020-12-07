@@ -1,0 +1,42 @@
+<h1>Simple Calculator</h1>
+
+<form [formGroup]="mathForm" (ngSubmit)="calculate()">
+  <div [hidden]="integer1.valid && integer2.valid && operator.valid" style="color: red">
+    All fields required!
+  </div>
+
+  <div *ngIf="errorResponse" style="color: red">
+    {{ errorResponse.message }}
+  </div>
+
+  <p>
+    <label for="integer1">First number </label>
+    <input type="number" id="integer1" name="integer1" formControlName="integer1">
+  </p>
+
+  <p>
+    <label for="operator">Operator </label>
+    <select id="operator" name="operator" formControlName="operator">
+      <option [ngValue]="option" *ngFor="let option of operatorList">
+        {{ option }}
+      </option>
+    </select>
+  </p>
+
+  <p>
+    <label for="integer2">First number </label>
+    <input type="number" id="integer2" name="integer2" formControlName="integer2">
+  </p>
+
+  <div *ngIf="answer">
+    <p>
+      <label>Result = </label>
+      {{ answer.result }}
+    </p>
+  </div>
+
+  <p>
+    <button [disabled]="!integer1.valid || !integer2.valid || !operator.valid" type="submit">Calculate</button>
+  </p>
+
+</form>
