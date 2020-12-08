@@ -1,8 +1,12 @@
 package nl.wderoode.assesment.service;
 
 import nl.wderoode.assesment.calculator.SimpleCalculator;
+import nl.wderoode.assesment.model.MathExpression;
+import nl.wderoode.assesment.web.CalculateListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static nl.wderoode.assesment.web.CalculatorController.Operator.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,5 +53,23 @@ class CalculatorServiceTest {
         assertThatCode(() -> calculatorService.calculate(6, 0, DIVISION))
                 .isInstanceOf(ArithmeticException.class)
                 .hasMessage("Cannot divide by zero");
+    }
+
+    @Test
+    void testCalculateList_WithListOfAdditionOf5By5_ReturnListOf1Result() {
+        var mathExpression = new MathExpression(5, 5, ADDITION);
+        CalculateListResponse result = calculatorService.calculateList(List.of(mathExpression));
+
+        assertThat(result.getResults().get(0).getMathExpression()).isEqualTo(mathExpression);
+        assertThat(result.getResults().get(0).getResult()).isEqualTo(10.0);
+    }
+
+    @Test
+    void testCalculateList_WithListInvalidExpression_ReturnListOf1ResultOfWhichResultIsNull() {
+        var mathExpression = new MathExpression(5, 5, null);
+        CalculateListResponse result = calculatorService.calculateList(List.of(mathExpression));
+
+        assertThat(result.getResults().get(0).getMathExpression()).isEqualTo(mathExpression);
+        assertThat(result.getResults().get(0).getResult()).isNull();
     }
 }

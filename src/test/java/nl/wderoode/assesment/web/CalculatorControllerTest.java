@@ -1,5 +1,6 @@
 package nl.wderoode.assesment.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.wderoode.assesment.service.CalculatorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class CalculatorControllerTest {
     @BeforeEach
     void beforeEach() {
         calculatorService = mock(CalculatorService.class);
-        calculatorController = new CalculatorController(calculatorService);
+        calculatorController = new CalculatorController(calculatorService, new ObjectMapper());
     }
 
     @Test
@@ -28,7 +29,8 @@ class CalculatorControllerTest {
         ResponseEntity<String> response = calculatorController.calculate(15, 25, ADDITION);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo("{ \"result\": 35.000000 }");
+        // todo: should be tested with jsonassert
+        assertThat(response.getBody()).isEqualTo("{ \"result\": 35.0 }");
     }
 
     @Test
@@ -36,6 +38,7 @@ class CalculatorControllerTest {
         ResponseEntity<String> response = calculatorController.calculate(15, 25, null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("{ \"error\": Invalid input, need two numbers and an operator}");
+        // todo: should be tested with jsonassert
+        assertThat(response.getBody()).isEqualTo("{ \"error\": Invalid input, need two numbers and an operator }");
     }
 }
