@@ -2,57 +2,71 @@ package nl.wderoode.assesment.service;
 
 import nl.wderoode.assesment.calculator.SimpleCalculator;
 import nl.wderoode.assesment.model.MathExpression;
-import nl.wderoode.assesment.web.CalculateListRequest;
+import nl.wderoode.assesment.repository.CalculationRepository;
 import nl.wderoode.assesment.web.CalculateListResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static nl.wderoode.assesment.web.CalculatorController.Operator;
+import static nl.wderoode.assesment.web.CalculateListResponse.Result;
 
 @Service
 public class CalculatorService {
     private final SimpleCalculator simpleCalculator;
+    private final CalculationRepository calculationRepository;
 
-    public CalculatorService(SimpleCalculator simpleCalculator) {
+    public CalculatorService(SimpleCalculator simpleCalculator, CalculationRepository calculationRepository) {
         this.simpleCalculator = simpleCalculator;
+        this.calculationRepository = calculationRepository;
     }
 
-    public double calculate(Integer integer1, Integer integer2, Operator operator) throws ArithmeticException {
-        if(operator == null) {
+    public double calculate(MathExpression mathExpression) throws ArithmeticException {
+        if (mathExpression.getOperator() == null) {
             throw new ArithmeticException("Operator cannot be null");
         }
 
-        switch (operator) {
+        double result;
+        switch (mathExpression.getOperator()) {
             case ADDITION:
-                return simpleCalculator.add(integer1, integer2);
+                result = simpleCalculator.add(mathExpression.getInteger1(), mathExpression.getInteger2());
+                break;
             case SUBTRACTION:
-                return simpleCalculator.subtract(integer1, integer2);
+                result = simpleCalculator.subtract(mathExpression.getInteger1(), mathExpression.getInteger2());
+                break;
             case MULTIPLICATION:
-                return simpleCalculator.multiply(integer1, integer2);
+                result = simpleCalculator.multiply(mathExpression.getInteger1(), mathExpression.getInteger2());
+                break;
             case DIVISION:
-                return simpleCalculator.divide(integer1, integer2);
+                result = simpleCalculator.divide(mathExpression.getInteger1(), mathExpression.getInteger2());
+                break;
             default:
                 throw new ArithmeticException("Unsupported operator in expression");
         }
+
+        calculationRepository.insertCalculationResult(mathExpression, result);
+        return result;
     }
 
     public CalculateListResponse calculateList(List<MathExpression> mathExpressionList) {
-        var results = new ArrayList<CalculateListResponse.Result>(mathExpressionList.size());
-        mathExpressionList.forEach(me -> {
+        var results = new ArrayList<Result>(mathExpressionList.size());
+        mathExpressionList.forEach(mathExpression -> {
             try {
-                double result = this.calculate(me.getInteger1(), me.getInteger2(), me.getOperator());
-                results.add(mapResult(me, result));
+                double result = this.calculate(mathExpression);
+                results.add(mapResult(mathExpression, result));
             } catch (ArithmeticException e) {
-                results.add(mapResult(me, null));
+                results.add(mapResult(mathExpression, null));
             }
         });
 
         return new CalculateListResponse(results);
     }
 
-    private CalculateListResponse.Result mapResult(MathExpression mathExpression, Double result) {
-        return new CalculateListResponse.Result(mathExpression, result);
+    private Result mapResult(MathExpression mathExpression, Double result) {
+        return new Result(mathExpression, result);
+    }
+
+    public List<Result> getCalculations() {
+        return calculationRepository.selectResults();
     }
 }

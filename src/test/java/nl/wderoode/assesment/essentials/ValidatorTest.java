@@ -30,7 +30,7 @@ class ValidatorTest {
 
     @Test
     void testValidateRequest_WithValidReuest_DoesNotThrowException() {
-        var request = new CalculateListRequest(List.of(new MathExpression(5, 5, ADDITION)));
+        var request = List.of(new MathExpression(5, 5, ADDITION));
 
         assertThatCode(() -> Validator.validateRequest(request))
                 .doesNotThrowAnyException();
@@ -38,7 +38,7 @@ class ValidatorTest {
 
     @Test
     void testValidateRequest_WithInvalidReuest_ThrowsException() {
-        var request = new CalculateListRequest(List.of(new MathExpression(null, 5, ADDITION)));
+        var request = List.of(new MathExpression(null, 5, ADDITION));
 
         assertThatCode(() -> Validator.validateRequest(request))
                 .isInstanceOf(ArithmeticException.class)

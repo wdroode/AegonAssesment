@@ -1,7 +1,9 @@
 package nl.wderoode.assesment.essentials;
 
+import nl.wderoode.assesment.model.MathExpression;
 import nl.wderoode.assesment.web.CalculateListRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 import static nl.wderoode.assesment.web.CalculatorController.Operator;
@@ -13,8 +15,8 @@ public class Validator {
         }
     }
 
-    public static void validateRequest(CalculateListRequest calculateListRequest) {
-        Optional<Boolean> result = calculateListRequest.getMathExpressions().stream()
+    public static void validateRequest(List<MathExpression> mathExpressions) {
+        Optional<Boolean> result = mathExpressions.stream()
                 .map(e -> validate(e.getInteger1(), e.getInteger2(), e.getOperator()))
                 .filter(e -> e.equals(false))
                 .findFirst();

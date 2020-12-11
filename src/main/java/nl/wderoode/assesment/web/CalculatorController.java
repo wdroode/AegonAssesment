@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import nl.wderoode.assesment.essentials.Validator;
+import nl.wderoode.assesment.model.MathExpression;
 import nl.wderoode.assesment.service.CalculatorService;
+import nl.wderoode.assesment.web.CalculateListResponse.Result;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class CalculatorController {
@@ -23,26 +24,35 @@ public class CalculatorController {
         this.objectMapper = objectMapper;
     }
 
+    @SneakyThrows
     @GetMapping("/api/v1/calculate")
     public ResponseEntity<String> calculate(@RequestParam Integer integer1, Integer integer2, Operator operator) {
         try {
             Validator.validateParams(integer1, integer2, operator);
 
-            double result = calculatorService.calculate(integer1, integer2, operator);
+            var expression = new MathExpression(integer1, integer2, operator);
 
-            return okResponse("" + result);
+             var result = new Result(expression, calculatorService.calculate(expression));
+
+            return okResponse("" + objectMapper.writeValueAsString(result));
         } catch (ArithmeticException e) {
             return badResponse(e.getMessage());
         }
     }
 
     @SneakyThrows
-    @GetMapping("/api/v1/calculatelist")
-    public ResponseEntity<String> calculateList(@RequestBody CalculateListRequest requestBody) {
+    @GetMapping("/api/v1/calculations")
+    public ResponseEntity<String> caluclations() {
+        return okResponse(objectMapper.writeValueAsString(calculatorService.getCalculations()));
+    }
+
+    @SneakyThrows
+    @PostMapping("/api/v1/calculatelist")
+    public ResponseEntity<String> calculateList(@RequestBody List<MathExpression> requestBody) {
         try {
             Validator.validateRequest(requestBody);
 
-            var result = calculatorService.calculateList(requestBody.getMathExpressions());
+            var result = calculatorService.calculateList(requestBody);
 
             return okResponse(objectMapper.writeValueAsString(result));
         } catch (ArithmeticException e) {
