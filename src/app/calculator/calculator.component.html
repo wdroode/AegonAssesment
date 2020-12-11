@@ -28,15 +28,50 @@
     <input type="number" id="integer2" name="integer2" formControlName="integer2">
   </p>
 
-  <div *ngIf="answer">
-    <p>
-      <label>Result = </label>
-      {{ answer.result }}
-    </p>
+  <div *ngIf="answers.length > 0">
+
+    <label>Result(s): </label>
+    <ul>
+      <li *ngFor="let answer of answers">
+        {{ answer.mathExpression.operator }}({{ answer.mathExpression.integer1 }}
+        by {{ answer.mathExpression.integer2 }}): {{ answer.result }}
+      </li>
+    </ul>
   </div>
 
   <p>
     <button [disabled]="!integer1.valid || !integer2.valid || !operator.valid" type="submit">Calculate</button>
   </p>
+
+  <div>
+    <p>
+      <button [disabled]="!integer1.valid || !integer2.valid || !operator.valid" type="button" (click)="addToList()">
+        Add to list
+      </button>
+      &nbsp;&nbsp;
+      <button [disabled]="calcList.length < 1" type="button" (click)="calculateList()">
+        Calculate list
+      </button>
+    </p>
+  </div>
+
+  <div *ngIf="calcList.length > 0">
+    List of expressions:
+    <ul>
+      <li *ngFor="let calc of calcList">
+        {{ calc.operator }}({{ calc.integer1 }} by {{ calc.integer2 }}): ?
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="results">
+    <h2>Previous calculations:</h2>
+    <Ul>
+      <li *ngFor="let result of results">
+        {{ result.mathExpression.operator }}({{ result.mathExpression.integer1 }}
+        by {{ result.mathExpression.integer2 }}): {{ result.result }}
+      </li>
+    </Ul>
+  </div>
 
 </form>

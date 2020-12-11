@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {CalculatorService} from '../calculator.service';
+import {Expression} from '../model/expression';
 
 @Component({
   selector: 'app-calculator',
@@ -9,8 +10,10 @@ import {CalculatorService} from '../calculator.service';
 })
 export class CalculatorComponent implements OnInit {
   mathForm: FormGroup;
-  answer = null;
   errorResponse = null;
+  calcList = [];
+  answers = [];
+  results = [];
 
   operatorList: string[] = ['+', '-', '*', '/'];
 
@@ -26,6 +29,7 @@ export class CalculatorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.getResults();
   }
 
   get integer1(): AbstractControl {
@@ -44,11 +48,43 @@ export class CalculatorComponent implements OnInit {
     this.calculatorService.getResult(this.integer1.value, this.integer2.value, this.operator.value)
       .subscribe(
         data => {
-          this.answer = data;
+          this.answers = data.result.results;
         },
         error => {
           this.errorResponse = error;
           console.log(error);
         });
+
+    this.getResults();
+  }
+
+  calculateList(): void {
+    this.calculatorService.postCalculationList(this.calcList).subscribe(
+      data => {
+        console.log(data.result);
+        this.answers = data.result.results;
+      },
+      error => {
+        this.errorResponse = error;
+        console.log(error);
+      });
+
+    this.calcList = [];
+    this.getResults();
+  }
+
+  addToList(): void {
+    this.calcList.push(new Expression(this.integer1.value, this.integer2.value, this.calculatorService.getOperator(this.operator.value)));
+  }
+
+  getResults(): void {
+    this.calculatorService.getResults().subscribe(
+      data => {
+        this.results = data.result;
+      },
+      error => {
+        this.errorResponse = error;
+        console.log(error);
+      });
   }
 }
